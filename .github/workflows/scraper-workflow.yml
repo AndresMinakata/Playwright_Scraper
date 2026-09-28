@@ -1,0 +1,38 @@
+name: Playwright Scraper On-Demand
+
+# El disparador 'workflow_dispatch' te permite ejecutar esto manualmente
+# desde un botón en la interfaz de GitHub o mediante una llamada API.
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Instalar dependencias de Python
+        run: pip install -r requirements.txt
+
+      - name: Instalar navegadores de Playwright y dependencias de sistema
+        run: playwright install --with-deps chromium
+
+      - name: Ejecutar el Scraper
+        run: python scraper.py
+        # env:
+        #   WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+
+      - name: Subir el JSON extraído como Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scraper-data
+          path: output_data.json
+          retention-days: 7
